@@ -11,7 +11,7 @@
 //            opts: {cutoff: integer}
 // ///////////////////////////////////////////////
 
-app.EqualHeights = (function($, _, app) {
+app.EqualHeights = (function($, app) {
 
 	var def = function(el, opts) {
 		var self = this;
@@ -86,4 +86,4 @@ app.EqualHeights = (function($, _, app) {
 
 	return def;
 
-}).call(this, jQuery, _, app);
+}).call(this, jQuery, app);
