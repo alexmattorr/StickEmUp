@@ -1,89 +1,82 @@
 // ///////////////////////////////////////////////
-// name:      equalHeights
-// purpose:   to maintain equal heights across columns 
+// name:      StickEmUp
+// purpose:   to stick things up
 // usage:     markup required is:
-// //////     <div class="equal-height-group">
-// //////     	<div class="equal-height-item"></div>
-// //////     	<div class="equal-height-item"></div>
-// //////     </div>
+// //////     <div class="stick-em-up"></div>
 //
-// options:   el:   a jQuery element object
-//            opts: {cutoff: integer}
 // ///////////////////////////////////////////////
 
-app.EqualHeights = (function($, app) {
+app.StickEmUp = (function($, app) {
+    
+    var def = function(el) {
+        this.name = 'stick-em-up';
+        this.$els = $(el);
 
-	var def = function(el, opts) {
-		var self = this;
+        this.states = {
+            'fixed': 'fixed',
+            'abs': 'absolute'
+        };
 
-		this.$els = {
-			'item' : el,
-			'children' : '.equal-height-item'
-		};
+        this.base = this.$els.eq(0).offset().top;
 
-		this.opts = opts;
+        init.call(this);
+    };
 
-		this.heights = [];
+    var init = function() {
+        this.load();
+        this.bind();
+    };
 
-		this.waiter = _.debounce(function(e) {
-			self.destroy();
-			self.measure();
-		}, 200);
+    def.prototype = {
 
-		init.call(this);
-	};
+        bind: function() {
+            var self = this;
 
-	var init = function() {
-		this.bind();
-		this.measure();
-	};
+            $(window).on('scroll', function() {
+                self.scroll();
+            });
+        },
 
-	def.prototype = {
+        load: function() {
+            var self = this;
 
-		bind: function() {
-			var self = this;
-			$(window).resize(function() {
-				if(self.opts.cutoff && $(window).width() <= self.opts.cutoff) {
-					self.destroy();
-				} else {
-					self.waiter();
-				}
-			});
-		},
+            this.$els.each(function() {
+                var stick = $(this);
 
-		measure: function() {
-			var self = this;
+                $(this).wrap('<div class="'+self.name+'-container"></div>');
 
-			this.heights = [];
+                stick.parent().height(stick.outerHeight(true));
 
-			$(this.$els.children, this.$els.item).each(function(){
-				self.heights.push($(this).outerHeight(true));
-			});
+                $.data(stick[0], 'pos', stick.offset().top);
+            });
+        },
 
-			this.set();
-		},
+        scroll: function() {
+            var self = this;
 
-		findLargest: function() {
-			return Math.max.apply(Math, this.heights);
-		},
+            this.$els.each(function(i) {
+                var stick = $(this),
+                    next = self.$els.eq(i+1),
+                    prev = self.$els.eq(i-1),
+                    pos = $.data(stick[0], 'pos');
 
-		set: function() {
-			var base = this.findLargest();
-			this.applyStyles(base);
-		},
+                if(pos <= $(window).scrollTop()) {
+                    stick.addClass(self.states.fixed);
 
-		destroy: function() {
-			this.applyStyles('');
-		},
+                    if(next.length > 0 && stick.offset().top >= $.data(stick[0], 'pos') - stick.outerHeight()) {
+                        stick.addClass(self.states.abs).css('top', $.data(next[0], 'pos') - (stick.outerHeight() * 2) - (self.base - self.$els.eq(i).outerHeight()) );
+                    }
+                } else {
+                    stick.removeClass(self.states.fixed);
 
-		applyStyles: function(h) {
-			$(this.$els.children, this.$els.item).each(function(){
-				$(this).css('height', h);
-			});
-		}
+                    if (prev.length > 0 && $(window).scrollTop() <= $.data(stick[0], 'pos') - prev.outerHeight()) {
+                        prev.removeClass(self.states.abs).removeAttr('style');
+                    }
+                }
+            });
+        }
 
-	}
+    };
 
-	return def;
-
+    return def;
 }).call(this, jQuery, app);
