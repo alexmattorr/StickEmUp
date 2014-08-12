@@ -292,6 +292,12 @@ Full-Width Styles
   padding: 20px 10px;
   margin: 0 auto;
 }
+#main_content.inner {
+  width: 100%;
+  padding: 0;
+  margin: 30px 0;
+  max-width: 100%;
+}
 
 #forkme_banner {
   display: block;
@@ -341,7 +347,7 @@ Full-Width Styles
   position: absolute;
   width: 210px;
   z-index: 10;
-  bottom: -40px;
+  bottom: 20px;
   right: 0;
   height: 70px;
   background: url('../images/icon_download.png') no-repeat 0% 90%;
